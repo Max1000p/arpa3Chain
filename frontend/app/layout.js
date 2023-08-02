@@ -51,7 +51,9 @@ export default function RootLayout({ children }) {
       <body>
         <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider chains={chains}>
-            {children}
+            <ChakraProvider> 
+             {children}
+            </ChakraProvider>
           </RainbowKitProvider>
         </WagmiConfig>
       </body>
