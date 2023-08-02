@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    async headers() {
+    async rewrites() {
+        return [
+          {
+            source: '/:path*',
+            destination: 'http://192.168.10.121/:path*',
+          },
+        ]
+      }
+    ,async headers() {
         return [
             {
                 source: "/:path*",
