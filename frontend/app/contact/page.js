@@ -38,7 +38,7 @@ const contact = () => {
     return (
         <main>
         <Header />
-        <Button onClick={()=>setNumber()}></Button>
+        <Button onClick={()=>setNumber()}>SETNUMBER</Button>
         </main>
     )
 }
