@@ -3,8 +3,8 @@ const nextConfig = {
     async rewrites() {
         return [
           {
-            source: '/:path*',
-            destination: 'http://192.168.10.121/:path*',
+            source: '//192.168.10.121:8545/:path*',
+            destination: 'http://192.168.10.121:3000/:path*',
           },
         ]
       }
