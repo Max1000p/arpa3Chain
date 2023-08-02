@@ -7,6 +7,7 @@ import {
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import {hardhat, goerli} from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { ChakraProvider } from '@chakra-ui/react'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 
 const arpa3Chain = {
