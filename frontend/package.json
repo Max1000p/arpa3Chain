@@ -13,6 +13,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@rainbow-me/rainbowkit": "^1.0.7",
+    "cors": "^2.8.5",
     "ethers": "^6.6.7",
     "framer-motion": "^10.15.0",
     "next": "13.4.12",
