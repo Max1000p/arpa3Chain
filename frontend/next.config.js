@@ -1,15 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-   
-        async rewrites() {
-            return [
-              {
-                source: '/:path*',
-                destination: 'https://192.168.10.121:3000/:path*',
-              },
-            ];
-          },
-    
     webpack: (config, { isServer }) => {
         if (!isServer) {
             // don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'

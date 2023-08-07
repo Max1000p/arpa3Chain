@@ -16,15 +16,27 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         uint idP;
         uint amount;
         string description;
+        uint nbVote;
         bool isActive;
     }
 
     Privilege[] privilegeArray;
-
-    struct Profil{
+    
+    struct Proposal {
+        address addresse;
         string name;
         string firstname;
         string service;
+        uint nbvote;
+    }
+
+    Proposal[] proposalArray;
+
+    struct Profil {
+        string name;
+        string firstname;
+        uint nbVotePrivilege;
+        uint allowedVotePrivilege;
         bool active;
     }
 
@@ -49,6 +61,11 @@ contract Arpa3 is Ownable, ReentrancyGuard {
 
     function setNumber(uint _number) external {
         number = _number;
+    }
+
+    /// @notice Check if user is recorded on chain / Address and Proposal 
+    function isAccountExist(address _address) external view returns(bool){
+        return users[_address].active;
     }
 
 }

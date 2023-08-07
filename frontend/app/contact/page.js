@@ -10,12 +10,12 @@ import Contract from '../../public/Arpa3.json'
 
 const contact = () => {
     const { isConnected, address : addressAccount } = useAccount()
-    const contractAddress = '0x457DaDF045C29C7341431d1A63E1F2747EEfFD11'
-
-    const transport = http('https://192.168.10.121:8545')
+    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    console.log(contractAddress)
+    const transport = http('https://127.0.0.1:8545')
     // Create client for Viem
     const client = createPublicClient({
-        chain: arpa3Chain,
+        chain: hardhat,
         transport,
     })
 

@@ -5,7 +5,7 @@ import {
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import {hardhat, goerli} from 'wagmi/chains';
+import {hardhat} from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { ChakraProvider } from '@chakra-ui/react'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
@@ -29,7 +29,7 @@ const arpa3Chain = {
 
 const { chains, publicClient } = configureChains(
   
-  [hardhat,goerli,arpa3Chain],
+  [arpa3Chain,hardhat],
   [jsonRpcProvider({rpc: chain => ({ http: chain.rpcUrls.default.http[0] }),}),]
 );
 

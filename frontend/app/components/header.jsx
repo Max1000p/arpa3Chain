@@ -7,9 +7,9 @@ const Header = () => {
     return (
         <Flex p="2rem" justifyContent="space-between" alignItems="Center">
             <Text>
-                Logo
+                ARPACHAIN
             </Text>
-            <ConnectButton  label="Sign in" showBalance={true} />
+            <ConnectButton  label="Se connecter" showBalance={false} />
         </Flex>
     )
 }
