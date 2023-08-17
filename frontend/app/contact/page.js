@@ -1,5 +1,5 @@
 "use client"
-import Header from "../components/header"
+import Header from "../../components/header"
 import { Text,Button } from '@chakra-ui/react'
 import { hardhat,arpa3Chain } from 'wagmi/chains'
 import { useState, useEffect } from 'react'

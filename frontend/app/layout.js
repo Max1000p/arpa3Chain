@@ -1,4 +1,5 @@
 "use client"
+import { ThemeContextProvider } from '@/context/theme';
 import '@rainbow-me/rainbowkit/styles.css';
 import {
   getDefaultWallets,
@@ -52,8 +53,10 @@ export default function RootLayout({ children }) {
       <body>
         <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider chains={chains}>
-            <ChakraProvider> 
-             {children}
+            <ChakraProvider>
+              <ThemeContextProvider>
+                {children}
+              </ThemeContextProvider>
             </ChakraProvider>
           </RainbowKitProvider>
         </WagmiConfig>

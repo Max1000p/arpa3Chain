@@ -1,6 +1,9 @@
 "use client"
-import Header from "./components/header"
-import Profil from "./components/profil"
+import { useThemeContext } from "@/context/theme"
+import Header from "../components/header"
+import Profil from "../components/profil"
+import Workflow from "../components/stepper"
+import Privilege from "../components/privilege"
 import {
   Text,Button,Flex,Heading,Center,Box,SimpleGrid,
   Step,Card,Stat,StatLabel,StatNumber,textColor,IconBox,
@@ -13,6 +16,8 @@ import {
   StepTitle,
   Stepper,
   useSteps,
+  Container,
+  VStack,
 } from '@chakra-ui/react'
 import { arpa3Chain } from 'wagmi/chains'
 import { useState, useEffect } from 'react'
@@ -24,9 +29,8 @@ import Contract from '../public/Arpa3.json'
 export default function Home() {
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
   const { isConnected, address : addressAccount } = useAccount()
-  const [workflowStatus,setWorkflowStatus] = useState(0)
-  const [IsAccountExist, setIsAccountExist] = useState(false)
-  const [constant,setconstant] = useState("POP")
+  const {IsAccountExist, setIsAccountExist} = useThemeContext()
+  const { workflowStatus, setWorkflowStatus } = useThemeContext()
   
   const AccountExist =  async() => {
       try {
@@ -46,7 +50,7 @@ export default function Home() {
   useEffect(() => {
     console.log('Passe dans fonction')
      AccountExist()
-  }, [])
+  }, [isConnected])
 
   useEffect(() => {
     console.log('SetValeur' + IsAccountExist)
@@ -56,23 +60,31 @@ export default function Home() {
   return (
     <div>
       <Header />
+      
+      <Workflow />
       {isConnected ? (
-
-          <>       
-          {IsAccountExist ? (
-              <Text></Text>
-            ):(
-              <Profil />
-            )}
-          </>  
-
-        ) : (
         
+        <Container maxW="container.xxl" p={0}>
+           
+          {IsAccountExist ? (
+              <Flex py={20}> 
+                <Privilege />
+              </Flex>
+            ):(
+              <Flex p="2rem" justifyContent="center" alignItems="center">
+                <Profil />
+              </Flex>
+            )} 
+        </Container>
+        
+        ) : (
             <Flex p="2rem" justifyContent="center" alignItems="center">
                 <Heading>Merci de vous connecter</Heading>
             </Flex>
-          
+
       )}
+
+      
 
     
 

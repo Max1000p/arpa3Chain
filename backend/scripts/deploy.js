@@ -23,6 +23,9 @@ async function main() {
     });
     console.log(arpa3.address);
 
+    const Contract = await ethers.getContractFactory("Arpa3");
+    const instance = await Contract.attach(arpa3.address);
+    await instance.setWorkflowstatus(1);
 }
 
 main().catch((error) => {
