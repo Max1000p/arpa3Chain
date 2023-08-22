@@ -33,6 +33,8 @@ const privilege = () => {
     const [gain,setGain] = useState(0)
     const [balanceArpa,setBalanceArpa] = useState(0)
     const [allowance, setAllowance] = useState(0)
+    const [allowanceHuman, setAllowanceHuman] = useState(0)
+   
     const { workflowStatus, setWorkflowStatus } = useThemeContext(); 
 
     const getBalanceEth = async() => {
@@ -300,7 +302,7 @@ const privilege = () => {
                 <Card align='center'>
                     <CardHeader>
                         <Heading size='md'>SOLDE ARPACOIN</Heading>
-                        <Text fontSize='2xl'>{balanceArpa}</Text>
+                        <Text fontSize='2xl'>{ethers.utils.formatEther(balanceArpa)}</Text>
                     </CardHeader>
                 </Card>
             </GridItem>
@@ -352,7 +354,7 @@ const privilege = () => {
                         <Tbody>
                     
                 {listePrivilege.length > 0 ? listePrivilege.map((event, index) => {
-                        let amount = Number(event.amount)
+                        let amount = ethers.utils.formatEther(event.amount)
                                 return <Tr key={uuidv4()}>                                   
                                         <Td>{event.description}</Td>
                                         <Td>{amount}</Td>
