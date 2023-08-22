@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { useThemeContext } from "@/context/theme"
 import Winner from "../components/winner"
 import Voter from "../components/vote"
-import { Grid,GridItem, Card, CardBody,CardHeader, CardFooter,useToast,Textarea, Heading, 
-         Button, Stack, List, VStack, ListItem, Text, Divider,Table,TableCaption,Thead,Tr,Td,Th,Tbody,
+import { Grid,GridItem, Card, CardBody,CardHeader,useToast,Textarea, Heading,UnorderedList,
+         Button, Stack, ListItem, VStack,Text, Divider,Table,TableCaption,Thead,Tr,Td,Th,Tbody, Tag,
           } from '@chakra-ui/react'
 import { hardhat,arpa3Chain } from 'wagmi/chains'
 import { useState, useEffect } from 'react'
@@ -34,6 +34,7 @@ const privilege = () => {
     const [balanceArpa,setBalanceArpa] = useState(0)
     const [allowance, setAllowance] = useState(0)
     const [allowanceHuman, setAllowanceHuman] = useState(0)
+    const [orders,setOrders] = useState([])
    
     const { workflowStatus, setWorkflowStatus } = useThemeContext(); 
 
@@ -164,8 +165,8 @@ const privilege = () => {
             await writeContract(request)
             
             toast({
-                title: 'Achat du privilege',
-                description: `Ton privilège est disponible`,
+                title: 'Autorisation dépense Token APCoin',
+                description: `Autorisation de transfert de token ArpaCoin pour l'achat de privilège OK`,
                 status: 'success',
                 duration: 3000,
                 position: 'top',
@@ -178,7 +179,7 @@ const privilege = () => {
                 console.log(err)
                 toast({
                     title: 'Error!',
-                    description: 'Impossible paiement pour ce privilege',
+                    description: "Echec dans l'autorisation",
                     status: 'error',
                     duration: 3000,
                     isClosable: true,
@@ -195,7 +196,6 @@ const privilege = () => {
                 functionName: "allowance",
                 args: [addressAccount,"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"],
             });      
-            console.log(ethers.utils.formatEther(data))
             setAllowance(data)
         } catch (err) {
             console.log(err.message)
@@ -203,7 +203,6 @@ const privilege = () => {
     }
 
     const buyToken = async(index,amount) => {
-        console.log(amount)
         if( amount > 0 ){
             try {
                 const { request } = await prepareWriteContract({
@@ -211,12 +210,10 @@ const privilege = () => {
                     abi: Contract.abi,
                     account: addressAccount,
                     functionName: "buyPrivilege",
-                    args: [index,amount],
+                    args: [index,Number(amount)],
                 });
                 await writeContract(request)
 
-                getArpaCoin()
-                
                 toast({
                     title: 'Achat du privilege',
                     description: `Ton privilège est disponible, a toi de le demander quand tu le souhaiteras`,
@@ -225,7 +222,9 @@ const privilege = () => {
                     position: 'top',
                     isClosable: true,
                 })         
+                getArpaCoin()
                 getListPrivilege()
+                getOrders()
             }
             catch(err) {
                 console.log(err)
@@ -264,6 +263,21 @@ const privilege = () => {
         }
     }
 
+    const getOrders = async() => {
+        try {
+            const data = await readContract({
+                address: contractAddress,
+                abi: Contract.abi,
+                functionName: "getOrders"
+            });
+            console.log("liste acquis")
+            console.log(data)
+            setOrders(data)
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+
     useEffect(() => {
         getGain()
         getListPrivilege()
@@ -271,6 +285,7 @@ const privilege = () => {
         getMyBalanceDep()
         getArpaCoin()
         checkAllowance()
+        getOrders()
      }, [])
 
   return (
@@ -287,11 +302,6 @@ const privilege = () => {
                 <Button colorScheme='purple' onClick={() => addNewPrivilege()} >Enregister</Button>
             </Stack>
             </CardBody>
-            <CardFooter>
-                <Stack spacing={3}>
-                
-                </Stack>
-            </CardFooter>
         </Card>
 
         </VStack>
@@ -363,7 +373,7 @@ const privilege = () => {
                                             <>
                                             {allowance > event.amount ? (
                                             <Button colorScheme='teal' variant='outline'
-                                            onClick={()=>buyToken(index,amount)}>Buy</Button>
+                                            onClick={()=>buyToken(index,event.amount)}>Buy</Button>
                                             ):(<Button colorScheme='purple' onClick={() => approve()} >Autoriser</Button>)}
                                             </>
                                         ) :(
@@ -376,6 +386,29 @@ const privilege = () => {
                             )}
                         </Tbody>
                         </Table>
+                    </CardBody>
+                </Card>
+
+                <Divider mt={10} orientation='horizontal' />
+
+                <Card align='center'>
+                    <CardHeader>
+                        <Heading size='md'>PRIVILEGE ACQUIS</Heading>
+                    </CardHeader>
+                    <CardBody>
+                    <UnorderedList>
+                        {orders.length > 0 ? 
+                            orders.map((event) => {
+                                if (event.winnerAddress == addressAccount)
+                                return <ListItem key={uuidv4()}>{event.descprivi} - 
+                                    <Tag colorScheme='teal'>
+                                        {!event.consoprivi ? (<Text>Disponible</Text>):(<Text>Consommé</Text>)}
+                                    </Tag>
+                                </ListItem>  
+                            }) : (
+                                <ListItem>-</ListItem>
+                            )}
+                        </UnorderedList>
                     </CardBody>
                 </Card>
             </GridItem>

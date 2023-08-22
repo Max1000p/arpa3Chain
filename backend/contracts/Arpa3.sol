@@ -99,17 +99,16 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         require(arpa3Token.balanceOf(msg.sender) >= _amount,"Not enought funds to buy this privilege");
         require(privilegeArray[_indexp].amount == _amount,"Petit malin va ...");
 
-        require(arpa3Token.transferFrom(msg.sender,address(this), _amount * 10**18),"Transfer erreur");
+        require(arpa3Token.transferFrom(msg.sender,address(this), _amount),"Transfer erreur");
 
         Orders memory orders;
         orders.winnerAddress = msg.sender;
         orders.privilegeID = _indexp;
+        orders.descprivi = privilegeArray[_indexp].description;
         orders.timestamprivi = block.timestamp;
         orders.amountprivi = _amount;
         orders.consoprivi = false;
         ordersArray.push(orders);
-        
-        
         emit BuyToken(msg.sender, _amount, _indexp);
     }
 
