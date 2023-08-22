@@ -5,38 +5,34 @@ import { createPublicClient, http, parseAbiItem } from 'viem'
 import { readContract } from '@wagmi/core'
 import Contract from '../../public/Arpa3.json'
 import { ethers } from 'ethers'
-const balanceEth = () => {
 
+const orders = () => {
     const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
     const transport = http('http://localhost:8545')
 
-    const [balanceEth,setBalanceEth] = useState(0)
-
+    const [orders,setOrders] = useState([])
     
-
-    const getBalanceEth = async() => {
+    const getOrders = async() => {
         try {
             const data = await readContract({
                 address: contractAddress,
                 abi: Contract.abi,
-                functionName: "getMyEthBalance"
+                functionName: "getOrders"
             });
-            const value = ethers.BigNumber.from(data);
-            const formattedValue = ethers.utils.formatUnits(value, 18)
-            setBalanceEth(formattedValue.substring(0, formattedValue.indexOf(".") + 3))
+            setOrders(data)
         } catch (err) {
             console.log(err.message)
         }
     }
 
     useEffect(() => {
-        getBalanceEth()
-    }, [balanceEth])
+        getOrders()
+    }, [])
 
 
   return (
-    <Text>{balanceEth}</Text>
+    <div>orders</div>
   )
 }
 
-export default balanceEth
+export default orders

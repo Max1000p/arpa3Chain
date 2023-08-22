@@ -4,21 +4,7 @@ import Header from "../components/header"
 import Profil from "../components/profil"
 import Workflow from "../components/stepper"
 import Privilege from "../components/privilege"
-import {
-  Text,Button,Flex,Heading,Center,Box,SimpleGrid,
-  Step,Card,Stat,StatLabel,StatNumber,textColor,IconBox,
-  StepDescription,iconBlue,WalletIcon,GlobeIcon,
-  StepIcon,DocumentIcon,CartIcon,
-  StepIndicator,
-  StepNumber,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
-  useSteps,
-  Container,
-  VStack,
-} from '@chakra-ui/react'
+import {Flex,Heading,Container} from '@chakra-ui/react'
 import { arpa3Chain } from 'wagmi/chains'
 import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
@@ -27,7 +13,7 @@ import { readContract,prepareWriteContract, writeContract } from '@wagmi/core'
 import Contract from '../public/Arpa3.json'
 
 export default function Home() {
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+  const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
   const { isConnected, address : addressAccount } = useAccount()
   const {IsAccountExist, setIsAccountExist} = useThemeContext()
   const { workflowStatus, setWorkflowStatus } = useThemeContext()

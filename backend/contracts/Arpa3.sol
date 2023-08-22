@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract Arpa3 is Ownable, ReentrancyGuard {
     
-   //IERC20 public immutable arpa3Token;
+    IERC20 public immutable arpa3Token;
    
     enum  WorkflowStatus { UserRecording, RecordPrivilege, VoteSessionStart, VoteSessionEnd }
     WorkflowStatus public workflowstatus;
@@ -15,6 +15,7 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     uint public amountpriv = 500000000000000000;
     uint public votingSessionNumber;
     uint private winningProposalID;
+    uint public rewardAmount = 5;
 
     struct Privilege{
         uint idP;
@@ -36,14 +37,6 @@ contract Arpa3 is Ownable, ReentrancyGuard {
 
     Proposal[] public proposalArray;
 
-    struct Historic {
-        uint sessionNumber;
-        address proposalAddress;
-        string motivation;
-    }
-
-    Historic[] public historicArray;
-
     struct Profil {
         string name;
         string firstname;
@@ -52,6 +45,17 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         bool active;
     }
 
+    struct Orders {
+        address winnerAddress;
+        uint privilegeID;
+        string descprivi;
+        uint timestamprivi;
+        uint amountprivi;
+        bool consoprivi;
+    }
+
+    Orders[] public ordersArray;
+
     mapping(address => Profil) public users;
     mapping(address=>uint) balances;
 
@@ -59,6 +63,12 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     event AddPrivilege(address _address, string _description);
     event GetWinnerSession(uint _session, address _adresse, uint _nbVote);
     event HistoricVote(uint _session, address _adresse, string motivation);
+    event GetWinnerToken(address _address, uint _amount);
+    event BuyToken(address _address, uint _amount, uint _indexp);
+
+    constructor(address _rewardToken) {
+        arpa3Token = IERC20(_rewardToken);
+    }
 
     function addPrivilege(string calldata _description) external payable nonReentrant{
         require(users[msg.sender].active == true,"User not recorded");
@@ -84,9 +94,34 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         return privilegeArray;
     }
 
-    function setNumber(uint _number) external {
-        number = _number;
+    function buyPrivilege(uint _indexp,uint _amount) external {
+        require(_amount > 0, "Not correct price");
+        require(arpa3Token.balanceOf(msg.sender) >= _amount,"Not enought funds to buy this privilege");
+        require(privilegeArray[_indexp].amount == _amount,"Petit malin va ...");
+
+        require(arpa3Token.transferFrom(msg.sender,address(this), _amount * 10**18),"Transfer erreur");
+
+        Orders memory orders;
+        orders.winnerAddress = msg.sender;
+        orders.privilegeID = _indexp;
+        orders.timestamprivi = block.timestamp;
+        orders.amountprivi = _amount;
+        orders.consoprivi = false;
+        ordersArray.push(orders);
+        
+        
+        emit BuyToken(msg.sender, _amount, _indexp);
     }
+
+    function getOrders() external view returns(Orders[] memory){
+        return ordersArray;
+    }
+
+    function approveArpacoin(uint _amount) external {
+        arpa3Token.approve(msg.sender, _amount* 10**18);
+    }
+
+
 
     /// @notice Check if user is recorded on chain / Address and Proposal 
     function isAccountExist(address _address) external view returns(bool){
@@ -137,10 +172,10 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     }
 
     /// @notice Display the winner and clean data for next session
-    /// @dev update session number,clean data array proposalArray nbVote & struct user bool hasvoted
+    /// @dev send Token to winner
     function stopVoteSession() external onlyOwner{
         workflowstatus = WorkflowStatus.VoteSessionEnd;
-
+        _sendToken(proposalArray[winningProposalID].addresse);
     }
 
     function getWinner() external view returns(Proposal memory){
@@ -171,6 +206,25 @@ contract Arpa3 is Ownable, ReentrancyGuard {
 
     function getMyEthBalance() external view returns(uint){
         return msg.sender.balance;
+    }
+
+    function _sendToken(address _addresse) private nonReentrant {
+        require(_addresse != address(0), "not valid account");
+        require(proposalArray[winningProposalID].addresse == _addresse, "You are not the Winner Session vote");
+        arpa3Token.transfer(_addresse, rewardAmount * 10**18);
+        emit GetWinnerToken(_addresse, rewardAmount);
+    }
+
+    function setRewardAmount(uint _amount) external onlyOwner{
+        rewardAmount = _amount;
+    }
+
+    function getArpaTokenBalance() external view returns(uint){
+        return arpa3Token.balanceOf(msg.sender);
+    }
+
+    function getBalanceSC() external view returns(uint){
+        return arpa3Token.balanceOf(address(this));
     }
 
     fallback() external payable {}
