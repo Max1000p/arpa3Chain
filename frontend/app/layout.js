@@ -10,6 +10,7 @@ import {hardhat} from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { ChakraProvider } from '@chakra-ui/react'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
+import { contractAddress } from '../constants.js'
 
 const arpa3Chain = {
   id: 222222,
@@ -30,7 +31,7 @@ const arpa3Chain = {
 
 const { chains, publicClient } = configureChains(
   
-  [arpa3Chain,hardhat],
+  [/*arpa3Chain*/hardhat],
   [jsonRpcProvider({rpc: chain => ({ http: chain.rpcUrls.default.http[0] }),}),]
 );
 

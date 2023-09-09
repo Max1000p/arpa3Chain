@@ -13,13 +13,12 @@ import { createPublicClient, http, parseAbiItem } from 'viem'
 import { readContract,prepareWriteContract, writeContract } from '@wagmi/core'
 import Contract from '../public/Arpa3.json'
 import TokenContract from '../public/ArpaCoin.json'
+import { contractAddress, tokenAddress } from '../constants.js'
 import { ethers } from 'ethers'
 
 const privilege = () => {
     
     const { isConnected, address : addressAccount } = useAccount()
-    const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-    const tokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     const transport = http('http://localhost:8545')
     // Create client for Viem
     const client = createPublicClient({
@@ -35,6 +34,7 @@ const privilege = () => {
     const [allowance, setAllowance] = useState(0)
     const [allowanceHuman, setAllowanceHuman] = useState(0)
     const [orders,setOrders] = useState([])
+    const [pricePrivilege,setPricePrivilege] = useState(null)
    
     const { workflowStatus, setWorkflowStatus } = useThemeContext(); 
 
@@ -42,6 +42,7 @@ const privilege = () => {
         try {
             const data = await readContract({
                 address: contractAddress,
+                account: addressAccount,
                 abi: Contract.abi,
                 functionName: "getMyEthBalance"
             });
@@ -57,6 +58,7 @@ const privilege = () => {
         try {
             const data = await readContract({
                 address: contractAddress,
+                account: addressAccount,
                 abi: Contract.abi,
                 functionName: "getMyBalanceDep"
             });
@@ -93,9 +95,22 @@ const privilege = () => {
                 abi: Contract.abi,
                 functionName: "rewardAmount"
             });
-            const value = ethers.BigNumber.from(data);
-            setGain(value)
+           
+            setGain(ethers.utils.formatEther(data))
             getArpaCoin()
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+
+    const getPrivilegePrice = async() => {
+        try {
+            const data = await readContract({
+                address: contractAddress,
+                abi: Contract.abi,
+                functionName: "amountpriv"
+            });
+            setPricePrivilege(ethers.utils.formatEther(data))
         } catch (err) {
             console.log(err.message)
         }
@@ -105,7 +120,7 @@ const privilege = () => {
     
     const addNewPrivilege = async() => {
         if( privi != ''){
-            let amount = ethers.utils.parseEther("0.5")
+            let amount = ethers.utils.parseEther(pricePrivilege)
             try {
                 const { request } = await prepareWriteContract({
                     address: contractAddress,
@@ -152,7 +167,7 @@ const privilege = () => {
 
     }
 
-    const approve = async(amount) => {
+    const approve = async() => {
         
         try {
             const { request } = await prepareWriteContract({
@@ -160,13 +175,13 @@ const privilege = () => {
                 abi: TokenContract.abi,
                 account: addressAccount,
                 functionName: "approve",
-                args: ["0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",5000000000000000000],
+                args: [contractAddress,2000000000000000000],
             });
             await writeContract(request)
             
             toast({
                 title: 'Autorisation dépense Token APCoin',
-                description: `Autorisation de transfert de token ArpaCoin pour l'achat de privilège OK`,
+                description: `Autorisation de transfert de token APCoin pour l'achat de privilège OK`,
                 status: 'success',
                 duration: 3000,
                 position: 'top',
@@ -194,7 +209,7 @@ const privilege = () => {
                 abi: TokenContract.abi,
                 account: addressAccount,
                 functionName: "allowance",
-                args: [addressAccount,"0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"],
+                args: [addressAccount,contractAddress],
             });      
             setAllowance(data)
         } catch (err) {
@@ -223,6 +238,7 @@ const privilege = () => {
                     isClosable: true,
                 })         
                 getArpaCoin()
+                checkAllowance()
                 getListPrivilege()
                 getOrders()
             }
@@ -280,6 +296,7 @@ const privilege = () => {
 
     useEffect(() => {
         getGain()
+        getPrivilegePrice()
         getListPrivilege()
         getBalanceEth()
         getMyBalanceDep()
@@ -297,8 +314,8 @@ const privilege = () => {
             </CardHeader>
             <CardBody>
             <Stack spacing={3}>
-                <Textarea size="lg" variant='flushed' placeholder='Je voudrais ...' value={privi} onChange={(e) => setPrivi(e.target.value)} />
-                <Text fontSize='xs' color='tomato'>Coût 0.5 Ether</Text>
+                <Textarea size="lg" variant='flushed' placeholder='Votre souhait ...' value={privi} onChange={(e) => setPrivi(e.target.value)} />
+                <Text fontSize='xs' color='tomato'>Coût {pricePrivilege} Ether</Text>
                 <Button colorScheme='purple' onClick={() => addNewPrivilege()} >Enregister</Button>
             </Stack>
             </CardBody>
@@ -311,7 +328,7 @@ const privilege = () => {
             <GridItem w='100%' h='10' >
                 <Card align='center'>
                     <CardHeader>
-                        <Heading size='md'>SOLDE ARPACOIN</Heading>
+                        <Heading size='md'>SOLDE APCoin</Heading>
                         <Text fontSize='2xl'>{ethers.utils.formatEther(balanceArpa)}</Text>
                     </CardHeader>
                 </Card>
@@ -357,7 +374,7 @@ const privilege = () => {
                         <Thead>
                             <Tr>
                             <Th>Privilège</Th>
-                            <Th>Coût ARPACOIN</Th>
+                            <Th>Coût APCoin</Th>
                             <Th>Acheter</Th>
                             </Tr>
                         </Thead>
@@ -365,19 +382,20 @@ const privilege = () => {
                     
                 {listePrivilege.length > 0 ? listePrivilege.map((event, index) => {
                         let amount = ethers.utils.formatEther(event.amount)
+                        if(event.isActive == true)
                                 return <Tr key={uuidv4()}>                                   
                                         <Td>{event.description}</Td>
                                         <Td>{amount}</Td>
                                         <Td>
                                         {event.amount > 0 && balanceArpa > event.amount ? (
                                             <>
-                                            {allowance > event.amount ? (
+                                            {allowance >= event.amount ? (
                                             <Button colorScheme='teal' variant='outline'
                                             onClick={()=>buyToken(index,event.amount)}>Buy</Button>
                                             ):(<Button colorScheme='purple' onClick={() => approve()} >Autoriser</Button>)}
                                             </>
                                         ) :(
-                                            <Text size='xs'>not possible</Text>
+                                            <Text size='xs'><Button colorScheme='red' variant='ghost'>;(</Button></Text>
                                         )}
                                         </Td>
                                          </Tr>
@@ -391,7 +409,7 @@ const privilege = () => {
 
                 <Divider mt={10} orientation='horizontal' />
 
-                <Card align='center'>
+                <Card align='center' mb={30}>
                     <CardHeader>
                         <Heading size='md'>PRIVILEGE ACQUIS</Heading>
                     </CardHeader>

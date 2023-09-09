@@ -18,11 +18,10 @@ import { useState, useEffect } from 'react'
 import { createPublicClient, http } from 'viem'
 import { readContract } from '@wagmi/core'
 import Contract from '../public/Arpa3.json'
+import { contractAddress } from '../constants.js'
 
 
 const stepper = () => {
-
-    const contractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
     const transport = http('https://127.0.0.1:8545')
     // Create client for Viem
     const client = createPublicClient({

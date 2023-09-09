@@ -9,6 +9,10 @@ contract ArpaCoin is ERC20, Ownable {
         _mint(to, amount* 10**18);
     }
 
+      function mintb(address to) external payable{
+      require(msg.value >= 1 ether,"Not enought fund to mint");
+      _mint(to, 2000000000000000000);
+   }
 
 
 }

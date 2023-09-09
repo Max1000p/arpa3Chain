@@ -11,11 +11,11 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     enum  WorkflowStatus { UserRecording, RecordPrivilege, VoteSessionStart, VoteSessionEnd }
     WorkflowStatus public workflowstatus;
     uint public counter;
-    uint public number;
+    uint public number = 0;
     uint public amountpriv = 500000000000000000;
     uint public votingSessionNumber;
     uint private winningProposalID;
-    uint public rewardAmount = 5;
+    uint public rewardAmount = 500000000000000000;
 
     struct Privilege{
         uint idP;
@@ -78,16 +78,12 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         privilege.idP = counter;
         privilege.amount = 0;
         privilege.description = _description;
-        privilege.isActive = false;
+        privilege.isActive = true;
         privilegeArray.push(privilege);
 
         balances[msg.sender] += msg.value;
         ++counter;
         emit AddPrivilege(msg.sender, _description);
-    }
-
-    function addPrivilegePrice(uint _idp,uint _amount) external onlyOwner{
-        privilegeArray[_idp].amount = _amount;
     }
 
     function getPrivilege() external view returns(Privilege[] memory){
@@ -119,8 +115,6 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     function approveArpacoin(uint _amount) external {
         arpa3Token.approve(msg.sender, _amount* 10**18);
     }
-
-
 
     /// @notice Check if user is recorded on chain / Address and Proposal 
     function isAccountExist(address _address) external view returns(bool){
@@ -167,14 +161,8 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         if(proposalArray[_id].nbvote > proposalArray[winningProposalID].nbvote) {
             winningProposalID = _id;
         }
+        ++number;
         emit HistoricVote(votingSessionNumber, proposalArray[_id].addresse, _motivation);
-    }
-
-    /// @notice Display the winner and clean data for next session
-    /// @dev send Token to winner
-    function stopVoteSession() external onlyOwner{
-        workflowstatus = WorkflowStatus.VoteSessionEnd;
-        _sendToken(proposalArray[winningProposalID].addresse);
     }
 
     function getWinner() external view returns(Proposal memory){
@@ -182,21 +170,8 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         return proposalArray[winningProposalID];
     }
 
-    function startVoteSession() external onlyOwner{
-        ++votingSessionNumber;
-        workflowstatus = WorkflowStatus.VoteSessionStart;
-        for (uint256 index = 0; index < proposalArray.length; ++index) {
-            proposalArray[index].nbvote = 0;
-            users[proposalArray[index].addresse].hasvoted = false;
-        }
-    }
-
     function getProposal() external view returns(Proposal[] memory){
         return proposalArray;
-    }
-
-    function setWorkflowstatus(WorkflowStatus _step) external onlyOwner{
-        workflowstatus = _step;
     }
 
     function getMyBalanceDep() external view returns(uint){
@@ -210,12 +185,8 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     function _sendToken(address _addresse) private nonReentrant {
         require(_addresse != address(0), "not valid account");
         require(proposalArray[winningProposalID].addresse == _addresse, "You are not the Winner Session vote");
-        arpa3Token.transfer(_addresse, rewardAmount * 10**18);
+        arpa3Token.transfer(_addresse, rewardAmount);
         emit GetWinnerToken(_addresse, rewardAmount);
-    }
-
-    function setRewardAmount(uint _amount) external onlyOwner{
-        rewardAmount = _amount;
     }
 
     function getArpaTokenBalance() external view returns(uint){
@@ -226,7 +197,62 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         return arpa3Token.balanceOf(address(this));
     }
 
+    /** Admin function to set Dapps */
+    /// @notice Display the winner and clean data for next session
+    /// @dev send Token to winner
+
+    function addPrivilegePrice(uint _idp,uint _amount) external onlyOwner{
+        require(_amount > 0,"Bad amount for privilege");
+        require(_idp >= 0,"Bad privilege identifier");
+        privilegeArray[_idp].amount = _amount;
+    }
+
+    function moderatePrivilege(uint _idp, bool _status) external onlyOwner {
+        privilegeArray[_idp].isActive = _status;
+    }
+
+    /// @notice TODO__
+    /*
+    function deletePrivilege(uint _idp) external onlyOwner{
+        require(_idp >= 0, "bad number");
+
+    }
+    */
+
+    /// @dev Reinit du compteur de vote en cours pour la session (number)
+    function stopVoteSession() external onlyOwner{
+        workflowstatus = WorkflowStatus.VoteSessionEnd;
+        _sendToken(proposalArray[winningProposalID].addresse);
+    }
+
+    function setRewardAmount(uint _amount) external onlyOwner{
+        rewardAmount = _amount;
+    }
+
+    function setWorkflowstatus(WorkflowStatus _step) external onlyOwner{
+        workflowstatus = _step;
+    }
+
+    function startVoteSession() external onlyOwner{
+        number = 0;
+        ++votingSessionNumber;
+        workflowstatus = WorkflowStatus.VoteSessionStart;
+        for (uint256 index = 0; index < proposalArray.length; ++index) {
+            proposalArray[index].nbvote = 0;
+            users[proposalArray[index].addresse].hasvoted = false;
+        }
+    }
+
+    function setConsoOrders(uint _index,bool _status) external onlyOwner{
+        require(_index < 0 , "Bad settings");
+        ordersArray[_index].consoprivi = _status;
+    }
+
+    function setAmountPrivilege(uint _amount) external onlyOwner{
+        require(_amount > 0, "not enough for privilege");
+        amountpriv = _amount;
+    }
+
     fallback() external payable {}
     receive() external payable {}
-
 }
