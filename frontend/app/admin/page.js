@@ -117,37 +117,72 @@ const admin = () => {
     }
 
     const setVoteSession = async() => {
-
-        try {
-            const { request } = await prepareWriteContract({
-                address: contractAddress,
-                abi: Contract.abi,
-                functionName: "startVoteSession",
-                args: []
-            });
-            await writeContract(request)
-            
-            toast({
-                title: 'Session de Vote',
-                description: `Le changement de la session de vote à bien été modifié`,
-                status: 'success',
-                duration: 3000,
-                position: 'top',
-                isClosable: true,
-            })
-            setVoteStatus(null)
-            getVoteInProgress()
+        if(votestatus == 2){
+            // Nouvelle session de vote
+            try {
+                const { request } = await prepareWriteContract({
+                    address: contractAddress,
+                    abi: Contract.abi,
+                    functionName: "startVoteSession",
+                    args: []
+                });
+                await writeContract(request)
+                
+                toast({
+                    title: 'Session de Vote',
+                    description: `Le changement de la session de vote à bien été modifié`,
+                    status: 'success',
+                    duration: 3000,
+                    position: 'top',
+                    isClosable: true,
+                })
+                setVoteStatus(null)
+                
+            }
+            catch(err) {
+                console.log(err)
+                toast({
+                    title: 'Error!',
+                    description: 'Error system, contact Administrator',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                })
+            }
+        } else {
+            // Fermeture de session et affichage du gagnant
+            try {
+                const { request } = await prepareWriteContract({
+                    address: contractAddress,
+                    abi: Contract.abi,
+                    functionName: "stopVoteSession",
+                    args: []
+                });
+                await writeContract(request)
+                
+                toast({
+                    title: 'Session de Vote',
+                    description: `Le changement de la session de vote à bien été modifié`,
+                    status: 'success',
+                    duration: 3000,
+                    position: 'top',
+                    isClosable: true,
+                })
+                setVoteStatus(null)
+               
+            }
+            catch(err) {
+                console.log(err)
+                toast({
+                    title: 'Error!',
+                    description: 'Error system, contact Administrator',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                })
+            }
         }
-        catch(err) {
-            console.log(err)
-            toast({
-                title: 'Error!',
-                description: 'Error system, contact Administrator',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            })
-        }
+       
     }
 
     const getPrivilegePrice = async() => {

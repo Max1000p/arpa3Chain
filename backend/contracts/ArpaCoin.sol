@@ -6,7 +6,7 @@ contract ArpaCoin is ERC20, Ownable {
     constructor() ERC20("ARPACOIN", "APCoin") {}
 
     function mint(address to, uint256 amount) external onlyOwner {
-        _mint(to, amount* 10**18);
+        _mint(to, amount);
     }
 
       function mintb(address to) external payable{
