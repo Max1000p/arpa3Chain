@@ -29,8 +29,9 @@ async function main() {
 
     const instanceArpaToken = await ethers.getContractFactory("ArpaCoin");
     const instanceToken = await instanceArpaToken.attach(arpatoken.address);
-    /*
+    
     await instanceToken.mint(arpa3.address, 100000);
+    /*
     await instanceToken.mint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", 5);
     */
 }

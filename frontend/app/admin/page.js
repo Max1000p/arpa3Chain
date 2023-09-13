@@ -31,6 +31,9 @@ const admin = () => {
     const [voteInProgress,setVoteInProgress] = useState(0)
     const [pricePrivilege,setPricePrivilege] = useState(null)
     const [gain,setGain] = useState(null)
+    const { workflowStatus, setWorkflowStatus } = useThemeContext()
+    const [orders,setOrders] = useState([])
+    const [consommation,setConsommation] = useState("")
     const toast = useToast()
 
     const transport = http('https://127.0.0.1:8545')
@@ -39,6 +42,20 @@ const admin = () => {
         chain: hardhat,
         transport,
     })
+
+    const getworkflowStatus = async() => {
+        try {
+            const data = await readContract({
+                address: contractAddress,
+                abi: Contract.abi,
+                functionName: "workflowstatus"
+            });
+            setWorkflowStatus(data);
+            // return data;
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
 
     const isOwner = async() => {
         try {
@@ -137,6 +154,7 @@ const admin = () => {
                     isClosable: true,
                 })
                 setVoteStatus(null)
+                getworkflowStatus()
                 
             }
             catch(err) {
@@ -159,7 +177,7 @@ const admin = () => {
                     args: []
                 });
                 await writeContract(request)
-                
+                getworkflowStatus()
                 toast({
                     title: 'Session de Vote',
                     description: `Le changement de la session de vote à bien été modifié`,
@@ -308,12 +326,29 @@ const admin = () => {
         }
     }
 
+    const getOrders = async() => {
+        try {
+            const data = await readContract({
+                address: contractAddress,
+                abi: Contract.abi,
+                functionName: "getOrders"
+            });
+            console.log("liste acquis")
+            console.log(data)
+            setOrders(data)
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+
     useEffect(() => {
+        getworkflowStatus()
         isOwner()
         getPrivilegePrice()
         getGain()
         getListPrivilege()
         getVoteInProgress()
+        getOrders()
      }, [])
 
 
@@ -329,10 +364,10 @@ return (
                 </ModalBody>
 
                 <ModalFooter>
-                    <Button mt={2} size='xs' colorScheme='teal' variant='outline'
+                    <Button mt={2} size='sm' colorScheme='teal' variant='outline'
                     onClick={()=> {addPrice();onClose()}}>MODIFIER</Button>
 
-                    <Button mt={2} size='xs' colorScheme='red' variant='solid'
+                    <Button ml={5} mt={2} size='sm' colorScheme='red' variant='solid'
                     onClick={()=> {moderatePrivilege();onClose()}}>NON ELIGIBLE / POSSIBLE</Button>
 
                 </ModalFooter>
@@ -406,10 +441,13 @@ return (
                 </Flex>
             </Flex>
             <Flex width="40%">
-                <Flex direction="column" width="100%" ml={30} mr={30} mb={100}>
+                <Flex direction="column" width="100%" ml={30} mr={30}>
                     <Heading as='h2' size='sm' mt="2rem">
                         Ouverture / Fermeture Vote
                     </Heading>
+                    
+                    <Text>{workflowStatus}</Text>
+                    
                     <Select variant='flushed' placeholder='Choisir une option' onChange={(e) => setVoteStatus(e.target.value)}>
                         <option value='2'>NOUVELLE SESSION DE VOTE</option>
                         <option value='3'>FERMETURE VOTE ET RESULTAT</option>
@@ -417,12 +455,48 @@ return (
                     <Button colorScheme='purple' onClick={() => setVoteSession()} >VALIDER</Button>
                 </Flex>
             </Flex>
+            <Flex width="60%">
+                <Flex direction="column" width="100%" ml={30} mr={30}>
+                    <Heading as='h2' size='sm' mt="2rem">
+                        Gestion des Privilèges utilisateurs
+                    </Heading>
+                    <Flex mt="1rem">
+                        <Table variant="striped" w='100%' colorScheme="blue" size="md">
+                            <TableCaption>Listing des privilèges / prix</TableCaption>
+                            <Thead>
+                                <Tr>
+                                    <Th>Privilège | Addresse</Th>
+                                    <Th></Th>
+                                    
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                            {orders.length > 0 ? orders.map((event, index) => {
+                                    if(event.consoprivi == false)
+                                    return <Tr key={uuidv4()}>
+                                        <Td>{event.descprivi}
+                                        <Text fontSize='xs'>{event.winnerAddress}</Text>
+                                        </Td>
+                                        <Td>
+                                            <Button colorScheme='whatsapp' onClick={() => { onOpen(); setConsommation(index); } }>CONSOMME</Button>
+                                        </Td>
+                                       
+                                    </Tr>;
+                                }) : (
+                                    <Tr>En attente ...</Tr>
+                                )}
+                            </Tbody>
+                        </Table>
+                    </Flex>
+                    
+                </Flex>
+            </Flex>
             </>
      ) : (
         <Flex p="2rem" justifyContent="center" alignItems="center">
             <Heading>Accès non autorisé</Heading>
         </Flex>
-
+        
     )}
     </>
 

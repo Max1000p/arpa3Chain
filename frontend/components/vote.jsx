@@ -128,8 +128,8 @@ const vote = () => {
       </ModalBody>
 
       <ModalFooter>
-        <Button mt={2} size='xs' colorScheme='teal' variant='outline'
-         onClick={()=> {setVote();onClose()}}>Je Vote</Button>
+        <Button mt={2} size='sm' colorScheme='teal' variant='outline'
+         onClick={()=> {setVote();onClose()}}>VOTER</Button>
       </ModalFooter>
     </ModalContent>
   </Modal>      
