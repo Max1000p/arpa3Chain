@@ -14,7 +14,7 @@ module.exports = {
       chainId: 31337
     },
     arpaChain : {
-      url: "http://192.168.10.121:8545",
+      url: "http://192.168.10.124:8545",
       initialBaseFeePerGas: 0,
       accounts: [`${PK}`],
       chainId: 222222
