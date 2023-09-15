@@ -33,7 +33,9 @@ const admin = () => {
     const [gain,setGain] = useState(null)
     const { workflowStatus, setWorkflowStatus } = useThemeContext()
     const [orders,setOrders] = useState([])
-    const [consommation,setConsommation] = useState("")
+    const [consommation,setConsommation] = useState(null)
+    const [modalContent,setModalContent] = useState(0)
+    const [minimumVote, setMinimumVote] = useState(null)
     const toast = useToast()
 
     const transport = http('https://127.0.0.1:8545')
@@ -326,6 +328,40 @@ const admin = () => {
         }
     }
 
+    const validePrivilege = async() => {
+        try {
+            const { request } = await prepareWriteContract({
+                address: contractAddress,
+                abi: Contract.abi,
+                functionName: "setConsoOrders",
+                args: [consommation,true]
+            });
+            await writeContract(request)
+            
+            toast({
+                title: 'Consommation du privilège',
+                description: `Le privilège de l'utilisateur est passé en statut consommé`,
+                status: 'success',
+                duration: 3000,
+                position: 'top',
+                isClosable: true,
+            })
+            getListPrivilege()
+            getOrders()
+            setConsommation(null)
+        }
+        catch(err) {
+            console.log(err)
+            toast({
+                title: 'Error!',
+                description: 'Error system, contact Administrator',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            })
+        }
+    }
+
     const getOrders = async() => {
         try {
             const data = await readContract({
@@ -341,6 +377,53 @@ const admin = () => {
         }
     }
 
+    const getMinimumVote = async() => {
+        try {
+            const data = await readContract({
+                address: contractAddress,
+                abi: Contract.abi,
+                functionName: "minimumVote"
+            });
+            setMinimumVote(data)
+            console.log('minimum Vote')
+            console.log(data)
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
+
+    const addMinimumVote = async() => {
+        try {
+            const { request } = await prepareWriteContract({
+                address: contractAddress,
+                abi: Contract.abi,
+                functionName: "setMinimumVote",
+                args: [minimumVote]
+            });
+            await writeContract(request)
+            
+            toast({
+                title: 'Configuration du vote',
+                description: `Le nombre de vote minimal a bien été mis à jour`,
+                status: 'success',
+                duration: 3000,
+                position: 'top',
+                isClosable: true,
+            })
+            getMinimumVote()
+        }
+        catch(err) {
+            console.log(err)
+            toast({
+                title: 'Error!',
+                description: 'Error system, contact Administrator',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            })
+        }
+    }
+
     useEffect(() => {
         getworkflowStatus()
         isOwner()
@@ -349,6 +432,7 @@ const admin = () => {
         getListPrivilege()
         getVoteInProgress()
         getOrders()
+        getMinimumVote()
      }, [])
 
 
@@ -357,20 +441,31 @@ return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>COUT DU PRIVILEGE</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                <Input variant='flushed' placeholder='Coût du privilège' value={amountPrivi} onChange={(e) => setAmountPrivi(e.target.value)} />
-                </ModalBody>
+                {modalContent == 1 ? (
+                    <><ModalHeader>VALIDATION DU PRIVILEGE</ModalHeader><ModalCloseButton /><ModalBody>
+                        <Text>Le propriétaire de ce privilège demande son execution. La validation changera 
+                            le statut du privilège acquis en consommé pour l'utilisateur</Text>
+                    </ModalBody><ModalFooter>
+                            <Button mt={2} size='sm' colorScheme='teal' variant='outline'
+                                onClick={() => { validePrivilege(); onClose(); } }>VALIDER L'UTILISATION DU PRIVILEGE</Button>
 
-                <ModalFooter>
-                    <Button mt={2} size='sm' colorScheme='teal' variant='outline'
-                    onClick={()=> {addPrice();onClose()}}>MODIFIER</Button>
+                
+                        </ModalFooter></>
+                )
+                :
+                (
+                <><ModalHeader>GESTION DU PRIVILEGE</ModalHeader><ModalCloseButton /><ModalBody>
+                            <Input variant='flushed' placeholder='Coût du privilège' value={amountPrivi} onChange={(e) => setAmountPrivi(e.target.value)} />
+                        </ModalBody><ModalFooter>
+                                <Button mt={2} size='sm' colorScheme='teal' variant='outline'
+                                    onClick={() => { addPrice(); onClose(); } }>MODIFIER</Button>
 
-                    <Button ml={5} mt={2} size='sm' colorScheme='red' variant='solid'
-                    onClick={()=> {moderatePrivilege();onClose()}}>NON ELIGIBLE / POSSIBLE</Button>
+                                <Button ml={5} mt={2} size='sm' colorScheme='red' variant='solid'
+                                    onClick={() => { moderatePrivilege(); onClose(); } }>NON ELIGIBLE / POSSIBLE</Button>
+                            </ModalFooter></>
+                ) }
+                
 
-                </ModalFooter>
             </ModalContent>
         </Modal>      
 
@@ -389,12 +484,22 @@ return (
         <Flex width="40%">
             <Flex direction="column" width="100%" ml={30} mr={30}>
                 <Heading as='h2' size='sm' mt="2rem">
+                    Nombre de vote minimum
+                </Heading>
+                <Input onChange={e => setMinimumVote(e.target.value)} placeholder="Nombre" value={Number(minimumVote)} />
+                <Button colorScheme='purple' onClick={() => addMinimumVote()} >VALIDER</Button>
+            </Flex>
+        </Flex>
+        <Flex width="40%">
+            <Flex direction="column" width="100%" ml={30} mr={30}>
+                <Heading as='h2' size='sm' mt="2rem">
                     Gains en jeu
                 </Heading>
                 <Input onChange={e => setGain(e.target.value)} placeholder="Gain en Token" value={Number(gain)} />
                 <Button colorScheme='purple' onClick={() => addNewGain()} >VALIDER</Button>
             </Flex>
         </Flex>
+
         <Flex width="40%">
             <Flex direction="column" width="100%" ml={30} mr={30}>
                 <Heading as='h2' size='sm' mt="2rem">
@@ -428,7 +533,7 @@ return (
                                         <Td>{event.description}</Td>
                                         <Td>{amount}</Td>
                                         <Td>
-                                            <Button colorScheme='whatsapp' onClick={() => { onOpen(); setIndexPrivi(index); setAmountPrivi(amount); } }>GERER</Button>
+                                            <Button colorScheme='whatsapp' onClick={() => { onOpen(); setIndexPrivi(index); setAmountPrivi(amount); setModalContent(0)} }>GERER</Button>
                                         </Td>
                                        
                                     </Tr>;
@@ -445,8 +550,6 @@ return (
                     <Heading as='h2' size='sm' mt="2rem">
                         Ouverture / Fermeture Vote
                     </Heading>
-                    
-                    <Text>{workflowStatus}</Text>
                     
                     <Select variant='flushed' placeholder='Choisir une option' onChange={(e) => setVoteStatus(e.target.value)}>
                         <option value='2'>NOUVELLE SESSION DE VOTE</option>
@@ -478,7 +581,7 @@ return (
                                         <Text fontSize='xs'>{event.winnerAddress}</Text>
                                         </Td>
                                         <Td>
-                                            <Button colorScheme='whatsapp' onClick={() => { onOpen(); setConsommation(index); } }>CONSOMME</Button>
+                                            <Button colorScheme='whatsapp' onClick={() => { onOpen(); setConsommation(index); setModalContent(1)} }>CONSOMME</Button>
                                         </Td>
                                        
                                     </Tr>;

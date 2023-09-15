@@ -13,6 +13,7 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     uint public counter;
     uint public number = 0;
     uint public amountpriv = 500000000000000000;
+    uint public minimumVote = 1;
     uint public votingSessionNumber;
     uint private winningProposalID;
     uint public rewardAmount = 500000000000000000;
@@ -220,13 +221,20 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     */
 
     /// @dev Reinit du compteur de vote en cours pour la session (number)
+    /// @dev MinimumVote to send token at vote session stop
     function stopVoteSession() external onlyOwner{
         workflowstatus = WorkflowStatus.VoteSessionEnd;
-        _sendToken(proposalArray[winningProposalID].addresse);
+        if( number >= minimumVote ){
+            _sendToken(proposalArray[winningProposalID].addresse);
+        } 
     }
 
     function setRewardAmount(uint _amount) external onlyOwner{
         rewardAmount = _amount;
+    }
+
+    function setMinimumVote(uint _amount) external onlyOwner{
+        minimumVote = _amount;
     }
 
     function setWorkflowstatus(WorkflowStatus _step) external onlyOwner{
@@ -244,7 +252,7 @@ contract Arpa3 is Ownable, ReentrancyGuard {
     }
 
     function setConsoOrders(uint _index,bool _status) external onlyOwner{
-        require(_index < 0 , "Bad settings");
+        require(_index >= 0 , "Bad settings");
         ordersArray[_index].consoprivi = _status;
     }
 
