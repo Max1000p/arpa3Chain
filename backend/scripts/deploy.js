@@ -34,6 +34,11 @@ async function main() {
     /*
     await instanceToken.mint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", 5);
     */
+
+    /* Deploy Arpa
+    0x67b01552eEACc87FA0AA0C2dc4285735A48DD326    Token
+    0x2AD9AA95B2D586f40A90a3a53334EDc927288c0f    SmartContract
+    */
 }
 
 main().catch((error) => {
