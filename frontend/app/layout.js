@@ -23,7 +23,7 @@ const arpa3Chain = {
   },
   rpcUrls: {
     default: {
-      http: ['http://192.168.10.121:8545'],
+      http: ['http://192.168.10.124:8545'],
     },
   },
   testnet: false,
