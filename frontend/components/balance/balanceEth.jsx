@@ -8,12 +8,7 @@ import { contractAddress } from '../constants.js'
 import { ethers } from 'ethers'
 const balanceEth = () => {
 
-    const transport = http('http://localhost:8545')
-
     const [balanceEth,setBalanceEth] = useState(0)
-
-    
-
     const getBalanceEth = async() => {
         try {
             const data = await readContract({
