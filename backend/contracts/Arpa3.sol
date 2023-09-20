@@ -261,6 +261,12 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         amountpriv = _amount;
     }
 
+    function withdrawal() external payable onlyOwner {
+        require(address(this).balance > 0, "No cash in SmartContract");
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success);
+    }
+    
     fallback() external payable {}
     receive() external payable {}
 }
