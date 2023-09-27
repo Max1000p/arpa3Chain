@@ -18,6 +18,7 @@ import Contract from '../public/Arpa3.json'
 import { contractAddress } from '../constants.js'
 import { ethers } from 'ethers'
 
+
 const vote = () => {
     const { isConnected, address : addressAccount } = useAccount()
     const { isOpen, onOpen, onClose } = useDisclosure()

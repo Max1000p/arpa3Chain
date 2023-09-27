@@ -9,7 +9,7 @@ import { Grid,GridItem, Card, CardBody,CardHeader,useToast,Textarea, Heading,Uno
 import { hardhat,arpa3Chain } from 'wagmi/chains'
 import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
-import { createPublicClient, http, parseAbiItem } from 'viem'
+import { createPublicClient, http } from 'viem'
 import { readContract,prepareWriteContract, writeContract } from '@wagmi/core'
 import Contract from '../public/Arpa3.json'
 import TokenContract from '../public/ArpaCoin.json'
@@ -37,6 +37,9 @@ const privilege = () => {
     const [pricePrivilege,setPricePrivilege] = useState(null)
    
     const { workflowStatus, setWorkflowStatus } = useThemeContext(); 
+
+    const [transactionHash, setTransactionHash] = useState('');
+    const [confirmationCount, setConfirmationCount] = useState(0);
 
     const getBalanceEth = async() => {
         try {
@@ -121,6 +124,7 @@ const privilege = () => {
     const addNewPrivilege = async() => {
         if( privi != ''){
             let amount = ethers.utils.parseEther(pricePrivilege)
+
             try {
                 const { request } = await prepareWriteContract({
                     address: contractAddress,
@@ -129,8 +133,13 @@ const privilege = () => {
                     args: [privi],
                     value: amount
                 });
-                await writeContract(request)
-                
+
+                const { hash } = await writeContract(request)
+                const tx = await client.waitForTransactionReceipt( 
+                    { hash: hash }
+                )
+                console.log(tx)
+
                 toast({
                     title: 'Enregistrement dans la liste',
                     description: `Ton privilège à correctement été ajouté à la liste`,
@@ -304,6 +313,11 @@ const privilege = () => {
         checkAllowance()
         getOrders()
      }, [])
+
+
+
+
+
 
   return (
     <> 

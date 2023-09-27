@@ -22,7 +22,7 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         uint idP;
         uint amount;
         string description;
-        uint nbVote;
+        address addressuser;
         bool isActive;
     }
 
@@ -77,8 +77,9 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         
         Privilege memory privilege;
         privilege.idP = counter;
-        privilege.amount = 0;
+        privilege.amount = msg.value;
         privilege.description = _description;
+        privilege.addressuser = msg.sender;
         privilege.isActive = true;
         privilegeArray.push(privilege);
 
@@ -208,8 +209,13 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         privilegeArray[_idp].amount = _amount;
     }
 
-    function moderatePrivilege(uint _idp, bool _status) external onlyOwner {
+    ///@dev if remove list privilege, refund user
+    function moderatePrivilege(uint _idp, bool _status) external payable onlyOwner {
         privilegeArray[_idp].isActive = _status;
+        // Withdraw user
+        require(address(this).balance >= privilegeArray[_idp].amount, "Not enough cash in SmartContract");
+        (bool success, ) = privilegeArray[_idp].addressuser.call{value: privilegeArray[_idp].amount}("");
+        require(success); 
     }
 
     /// @notice TODO__
@@ -267,6 +273,11 @@ contract Arpa3 is Ownable, ReentrancyGuard {
         require(success);
     }
     
+    function deleteUser(uint _id) external onlyOwner{
+        require(_id >= 0, "bad bumber");
+        delete proposalArray[_id];
+    }
+
     fallback() external payable {}
     receive() external payable {}
 }

@@ -12,7 +12,7 @@ import { contractAddress } from '../constants.js'
 const profil = () => {
 
     const { isConnected, address : addressAccount } = useAccount()
-    const transport = http('https://127.0.0.1:8545')
+    const transport = http('http://127.0.0.1:8545')
     // Create client for Viem
     const client = createPublicClient({
         chain: hardhat,
@@ -33,7 +33,10 @@ const profil = () => {
                     functionName: "setProfilAndProposal",
                     args: [name,firstname,service]
                 });
-                await writeContract(request)
+                const { hash } = await writeContract(request)
+                const tx = await client.waitForTransactionReceipt( 
+                    { hash: hash }
+                )
                 
                 toast({
                     title: 'Enregistrement du profil',
