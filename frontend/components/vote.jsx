@@ -148,6 +148,7 @@ const vote = () => {
                     
                 {listVoter.length > 0 ? listVoter.map((event, index) => {
                             let concatenation = event.firstname.concat(" ", event.name)
+                            if (event.addresse != "0x0000000000000000000000000000000000000000")
                                 return <Tr key={uuidv4()}>                                   
                                         <Td>
                                         <WrapItem>
